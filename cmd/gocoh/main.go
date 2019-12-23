@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gchpaco/gocoh/pkg/manifest"
 	"log"
+	"os"
 )
 
 func main() {
