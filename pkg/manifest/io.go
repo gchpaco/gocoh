@@ -17,16 +17,23 @@ func Read(r io.Reader) (manifest *Manifest, err error) {
 	return
 }
 
-// Verify checks to see if a file on disk matches the indicated File
-// in the manifest.  If false, the file should be redownloaded.
-func (file *File) Verify(base string) (bool, error) {
+func (file *File) localizeTo(base string) (string, error) {
 	cleaned := filepath.Clean(file.Name)
 	if filepath.Base(cleaned) == ".." ||
 		filepath.Base(cleaned) == "." ||
 		filepath.Base(cleaned) == "/" {
-		return false, fmt.Errorf("Something weird going on with manifest; saw request for %s which is unsafe", cleaned)
+		return "", fmt.Errorf("Something weird going on with manifest; saw request for %s which is unsafe", cleaned)
 	}
-	localized := filepath.Join(base, cleaned)
+	return filepath.Join(base, cleaned), nil
+}
+
+// Verify checks to see if a file on disk matches the indicated File
+// in the manifest.  If false, the file should be redownloaded.
+func (file *File) Verify(base string) (bool, error) {
+	localized, err := file.localizeTo(base)
+	if err != nil {
+		return false, err
+	}
 	if stat, err := os.Lstat(localized); err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
