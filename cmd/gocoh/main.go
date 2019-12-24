@@ -23,10 +23,6 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Printf("Label: %s\n", manifest.Label)
-	//for _, profile := range manifest.Profiles {
-	//	fmt.Printf("Profile %s:\n\tExec: %s\n\tOrder: %d\n\tParams: %s\n",
-	//		profile.Name, profile.Exec, profile.Order, profile.Params)
-	//}
 	for _, file := range manifest.Files {
 		if *verbose {
 			log.Printf("Operating on file %s", file.Name)
@@ -41,5 +37,9 @@ func main() {
 				log.Fatal(err)
 			}
 		}
+	}
+	for _, profile := range manifest.Profiles {
+		log.Printf("Profile %s:\n\tExec: %s\n\tOrder: %d\n\tParams: %s\n",
+			profile.Name, profile.Exec, profile.Order, profile.Params)
 	}
 }
