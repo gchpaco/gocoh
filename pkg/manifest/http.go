@@ -17,28 +17,25 @@ func (e badStatusCode) Error() string {
 	return fmt.Sprintf("Bad status code seen: %d", e.StatusCode)
 }
 
+// Prepare ensures that all preconditions (like legality of file name,
+// existence of directory, etc) for the given file are satisfied
+// before continuing.  The first return argument is the localized
+// string for the filename, and the second is if any error occurred.
+func (file *File) Prepare(base string) (string, error) {
+	localized, err := file.localizeTo(base)
+	if err != nil {
+		return "", err
+	}
+	dir := filepath.Dir(localized)
+	return localized, os.MkdirAll(dir, 0755)
+}
+
 // Download retrieves a file from its mirrors, trying each in turn
 // until success or ultimate failure.
 func (file *File) Download(base string, verbose bool) error {
-	localized, err := file.localizeTo(base)
+	localized, err := file.Prepare(base)
 	if err != nil {
 		return err
-	}
-	if verbose {
-		log.Printf("Localized file is %s\n", localized)
-	}
-	dir := filepath.Dir(localized)
-	if verbose {
-		log.Printf("Localized file directory is %s\n", dir)
-	}
-	if verbose {
-		log.Printf("Making parent directories\n")
-	}
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return err
-	}
-	if verbose {
-		log.Printf("Creating file\n")
 	}
 	f, err := os.Create(localized)
 	if err != nil {
